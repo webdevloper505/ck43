@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <title>Olympus Fly · Aviator + Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #0c0f1c;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+        }
+        .game-container {
+            max-width: 480px;
+            width: 100%;
+            background: #101624;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 0 2px #2e3b4e inset;
+            padding: 16px 12px 20px;
+        }
+
+        /* Header with timer and big number */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1a2332;
+            border-radius: 50px;
+            padding: 8px 16px;
+            margin-bottom: 12px;
+        }
+        .timer {
+            color: #f0b90b;
+            font-weight: 700;
+            font-size: 24px;
+            text-shadow: 0 0 8px #ffaa00;
+        }
+        .big-balance {
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 26px;
+            background: #2f3b62;
+            padding: 4px 16px;
+            border-radius: 40px;
+            box-shadow: inset 0 -2px 0 #f0b90b;
+        }
+
+        /* Title row with OLYMPUS and login */
+        .title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .olympus-title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(145deg, #ffd966, #f0b90b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .login-badge {
+            background: #2f3b62;
+            padding: 6px 12px;
+            border-radius: 36px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 4px 0 #121827;
+            cursor: pointer;
+        }
+        .login-badge.logged-in {
+            background: #2e7d32;
+            box-shadow: 0 4px 0 #1b5e20;
+        }
+
+        /* Fly zone */
+        .flyzone {
+            background: #1a2639;
+            border-radius: 28px;
+            padding: 8px 0;
+            margin-bottom: 12px;
+            box-shadow: inset 0 0 20px #000000, 0 8px 0 #0b101c;
+            border-bottom: 2px solid #f0b90b;
+            touch-action: none;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #1a2639;
+            border-radius: 16px;
+            cursor: pointer;
+            touch-action: none;
+        }
+        .multiplier-badge {
+            text-align: center;
+            font-size: 42px;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 0 15px #f0b90b, 0 0 30px #ffaa00;
+            line-height: 1.2;
+            margin-top: -10px;
+        }
+
+        /* Button grid */
+        .button-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin: 12px 0;
+        }
+        .game-btn {
+            background: #25334d;
+            padding: 8px 14px;
+            border-radius: 40px;
+            color: #ffd966;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 4px 0 #0a121f;
+            border-bottom: 2px solid #f0b90b;
+            cursor: pointer;
+            white-space: nowrap;
+            flex: 0 1 auto;
+        }
+
+        /* Stats numbers row */
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            background: #131c2c;
+            border-radius: 40px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            border: 1px solid #3d506e;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 70px;
+        }
+        .stat-label {
+            color: #95a1c0;
+            font-size: 12px;
+        }
+        .stat-value {
+            color: #f5e56b;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        /* Feature row */
+        .feature-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .feature-chip {
+            background: #2e3c54;
+            padding: 6px 16px;
+            border-radius: 30px;
+            color: #b3e5fc;
+            font-weight: 600;
+            font-size: 14px;
+            border-left: 3px solid #f0b90b;
+        }
+
+        /* Wins row */
+        .wins-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #1f2a40;
+            border-radius: 40px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+        }
+        .wins-box {
+            text-align: center;
+        }
+        .wins-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffb851;
+        }
+        .wins-label {
+            color: #a3b6da;
+            font-size: 14px;
+        }
+        .pass-box {
+            text-align: center;
+        }
+        .pass-percent {
+            font-size: 24px;
+            font-weight: 800;
+            color: #4caf50;
+        }
+        .pass-label {
+            color: #a3b6da;
+            font-size: 14px;
+        }
+
+        /* Cashback */
+        .cashback {
+            background: #182237;
+            text-align: center;
+            padding: 8px;
+            border-radius: 40px;
+            color: #b3e5fc;
+            font-weight: 600;
+            font-size: 15px;
+            border: 1px dashed #f0b90b;
+            margin-bottom: 12px;
+        }
+        .cashback span {
+            color: #ffb74d;
+            font-weight: 800;
+        }
+
+        /* Olympus stats */
+        .olympus-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: space-between;
+            background: #1a2332;
+            border-radius: 40px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+        .olympus-item {
+            background: #2f3b62;
+            padding: 6px 12px;
+            border-radius: 30px;
+            color: #f5e56b;
+            font-weight: 700;
+            font-size: 16px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Bottom controls */
+        .bottom-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-around;
+            background: #162132;
+            border-radius: 60px;
+            padding: 10px 8px;
+            margin-top: 10px;
+            border: 1px solid #4b6085;
+        }
+        .ctrl-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+        .ctrl-label {
+            color: #95a1c0;
+            font-size: 11px;
+        }
+        .ctrl-value {
+            color: #ffd966;
+            font-weight: 800;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .spin-btn {
+            background: #f0b90b;
+            color: #0b0f1a;
+            font-weight: 800;
+            font-size: 22px;
+            padding: 10px 24px;
+            border-radius: 40px;
+            box-shadow: 0 6px 0 #b68b40;
+            cursor: pointer;
+            border-bottom: 2px solid #ffd966;
+        }
+        .hold-btn {
+            background: #2e7d32;
+            color: white;
+            font-weight: 800;
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 40px;
+            box-shadow: 0 5px 0 #1b5e20;
+            cursor: pointer;
+        }
+        .spin-btn:active, .hold-btn:active, .game-btn:active, .login-badge:active, .ctrl-value:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            margin-top: 20px;
+            background: #162132;
+            border-radius: 30px;
+            padding: 15px;
+            border: 2px solid #f0b90b;
+        }
+        .admin-title {
+            color: #f0b90b;
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .user-list {
+            background: #1f2a40;
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2f3b62;
+            padding: 8px 12px;
+            border-radius: 30px;
+            margin-bottom: 5px;
+            color: white;
+        }
+        .user-id {
+            font-weight: 600;
+            color: #ffd966;
+        }
+        .user-balance {
+            font-weight: 800;
+            color: #4caf50;
+        }
+        .admin-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .admin-input {
+            background: #0f1a2f;
+            border: 2px solid #f0b90b;
+            border-radius: 40px;
+            padding: 8px 15px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            flex: 1;
+            min-width: 120px;
+        }
+        .admin-btn {
+            background: #2e7d32;
+            color: white;
+            font-weight: 700;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #1b5e20;
+            border-bottom: 2px solid #a5d6a7;
+        }
+        .admin-btn.danger {
+            background: #b71c1c;
+            box-shadow: 0 4px 0 #8b0000;
+        }
+        .admin-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+        .show-admin {
+            text-align: center;
+            color: #f0b90b;
+            font-size: 12px;
+            margin-top: 5px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Deposit modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-box {
+            background: #1e2a3a;
+            max-width: 320px;
+            width: 90%;
+            padding: 24px 18px;
+            border-radius: 48px;
+            text-align: center;
+            box-shadow: 0 20px 40px black, 0 0 0 2px #f0b90b inset;
+            border-bottom: 6px solid #b68b40;
+        }
+        .modal-box h2 {
+            color: #ffd966;
+            font-size: 24px;
+            margin-bottom: 14px;
+            font-weight: 800;
+        }
+        .modal-bkash {
+            background: #d42058;
+            color: white;
+            font-weight: 800;
+            font-size: 20px;
+            padding: 10px;
+            border-radius: 60px;
+            margin: 10px 0 8px;
+            box-shadow: 0 0 15px #f06a9e;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0f1a2f;
+            border: 2px solid #f0b90b;
+            border-radius: 60px;
+            font-size: 16px;
+            color: white;
+            outline: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .modal-confirm {
+            background: #2e7d32;
+            color: white;
+            font-weight: 800;
+            font-size: 20px;
+            padding: 12px 18px;
+            border-radius: 60px;
+            box-shadow: 0 6px 0 #1b5e20;
+            border-bottom: 3px solid #a5d6a7;
+            cursor: pointer;
+            margin: 8px 0;
+        }
+        .modal-quick {
+            background: #555e7a;
+            color: #ffeeaa;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 40px;
+            margin-top: 14px;
+            cursor: pointer;
+            border: 1px solid #f0b90b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h2>💰 bKash Deposit</h2>
+            <div class="modal-bkash">01979243004</div>
+            <p>Send exactly <strong>100 BDT</strong> to this bKash number, then enter transaction ID.</p>
+            <input type="text" id="trxidInput" class="modal-input" placeholder="TrxID (e.g., D8T9K7M5)">
+            <div class="modal-confirm" id="confirmTrxBtn">Confirm Deposit</div>
+            <div class="modal-quick" id="quickAddBtn">⚡ Quick Add (Skip bKash) ⚡</div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <!-- Header with timer and big balance -->
+        <div class="header-top">
+            <span class="timer" id="timerDisplay">00:55:29</span>
+            <span class="big-balance" id="bigBalance">1,433,136</span>
+        </div>
+
+        <!-- Title row with OLYMPUS and login -->
+        <div class="title-row">
+            <span class="olympus-title">OLYMPUS</span>
+            <div class="login-badge" id="loginButton">🔑 LOGIN</div>
+        </div>
+
+        <!-- Fly zone -->
+        <div class="flyzone">
+            <canvas id="gameCanvas" width="400" height="140"></canvas>
+            <div class="multiplier-badge" id="multiplierDisplay">1.00x</div>
+        </div>
+
+        <!-- Button grid -->
+        <div class="button-grid">
+            <span class="game-btn">5XSALE</span>
+            <span class="game-btn">LEVEL23</span>
+            <span class="game-btn">COLLECT</span>
+            <span class="game-btn">FRAND</span>
+            <span class="game-btn">DARKOES</span>
+            <span class="game-btn">MINIGOE</span>
+            <span class="game-btn">MINI</span>
+        </div>
+
+        <!-- Big numbers row -->
+        <div class="stats-row">
+            <div class="stat-item"><span class="stat-label">BIG1</span><span class="stat-value">1,505,969,303</span></div>
+            <div class="stat-item"><span class="stat-label">BIG2</span><span class="stat-value">240,423,584</span></div>
+            <div class="stat-item"><span class="stat-label">BIG3</span><span class="stat-value">12,000,000</span></div>
+            <div class="stat-item"><span class="stat-label">BIG4</span><span class="stat-value">2,400,000</span></div>
+        </div>
+
+        <!-- Feature row -->
+        <div class="feature-row">
+            <span class="feature-chip">EPC</span>
+            <span class="feature-chip">FEATURE</span>
+            <span class="feature-chip">NOTELICIBLE</span>
+        </div>
+
+        <!-- Wins row -->
+        <div class="wins-row">
+            <div class="wins-box"><span class="wins-number">243</span><span class="wins-label"> WINS</span></div>
+            <div class="wins-box"><span class="wins-number">243</span><span class="wins-label"> WINS</span></div>
+            <div class="pass-box"><span class="pass-percent">43%</span><span class="pass-label"> PASS</span></div>
+        </div>
+
+        <!-- Cashback -->
+        <div class="cashback">
+            ⚡ 7DAYS CASH BACK <span>300,000</span> ⚡
+        </div>
+
+        <!-- Olympus stats -->
+        <div class="olympus-stats">
+            <span class="olympus-item">1,286,093</span>
+            <span class="olympus-item">93,600</span>
+            <span class="olympus-item">+93,600</span>
+            <span class="olympus-item">Round:10730</span>
+            <span class="olympus-item">41,600</span>
+        </div>
+
+        <!-- Bottom controls -->
+        <div class="bottom-controls">
+            <div class="ctrl-item"><span class="ctrl-label">TOTALBET</span><span class="ctrl-value" id="totalBet">10</span></div>
+            <div class="ctrl-item"><span class="ctrl-label">TOTALWIN</span><span class="ctrl-value" id="totalWin">0</span></div>
+            <div class="ctrl-item"><span class="ctrl-label">MAX BET</span><span class="ctrl-value" id="maxBet">100</span></div>
+            <div class="spin-btn" id="spinButton">SPIN</div>
+            <div class="hold-btn" id="holdButton">HOLD</div>
+        </div>
+
+        <!-- Admin Panel (hidden by default) -->
+        <div class="show-admin" id="showAdminBtn">🔧 Admin Panel (Click to Open)</div>
+        <div class="admin-panel" id="adminPanel" style="display: none;">
+            <div class="admin-title">👑 Admin Control</div>
+            <div class="user-list" id="userList">
+                <div class="user-item">
+                    <span class="user-id">01979243004</span>
+                    <span class="user-balance" id="adminUserBalance">1,433,136</span>
+                </div>
+            </div>
+            <div class="admin-controls">
+                <input type="number" id="addBalanceAmount" class="admin-input" placeholder="Amount" value="100">
+                <div class="admin-btn" id="addBalanceBtn">➕ Add Balance</div>
+            </div>
+            <div class="admin-controls" style="margin-top: 10px;">
+                <div class="admin-btn danger" id="resetGameBtn">🔄 Reset Game</div>
+                <div class="admin-btn" id="hideAdminBtn">🔒 Close Admin</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- STATE ----------
+            let balance = 1433136; // initial big balance
+            let gameActive = false;
+            let currentMultiplier = 1.0;
+            let crashMultiplier = 1.0;
+            let animationFrame = null;
+            let planeX = 50;
+            let autoModeActive = false;
+            let autoInterval = null;
+            let betAmount = 10.0;
+            let totalWinAmount = 0;
+
+            const CORRECT_ID = "01979243004";
+            let isLoggedIn = false;
+
+            // DOM elements
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const multiplierSpan = document.getElementById('multiplierDisplay');
+            const bigBalanceSpan = document.getElementById('bigBalance');
+            const timerSpan = document.getElementById('timerDisplay');
+            const totalBetSpan = document.getElementById('totalBet');
+            const totalWinSpan = document.getElementById('totalWin');
+            const spinButton = document.getElementById('spinButton');
+            const holdButton = document.getElementById('holdButton');
+            const loginButton = document.getElementById('loginButton');
+
+            // Admin panel elements
+            const showAdminBtn = document.getElementById('showAdminBtn');
+            const adminPanel = document.getElementById('adminPanel');
+            const adminUserBalance = document.getElementById('adminUserBalance');
+            const addBalanceAmount = document.getElementById('addBalanceAmount');
+            const addBalanceBtn = document.getElementById('addBalanceBtn');
+            const resetGameBtn = document.getElementById('resetGameBtn');
+            const hideAdminBtn = document.getElementById('hideAdminBtn');
+
+            // Deposit modal
+            const depositModal = document.getElementById('depositModal');
+            const trxidInput = document.getElementById('trxidInput');
+            const confirmTrxBtn = document.getElementById('confirmTrxBtn');
+            const quickAddBtn = document.getElementById('quickAddBtn');
+
+            // ---------- ADMIN PANEL TOGGLE ----------
+            showAdminBtn.addEventListener('click', () => {
+                if (adminPanel.style.display === 'none') {
+                    adminPanel.style.display = 'block';
+                    showAdminBtn.innerText = '🔧 Admin Panel (Click to Close)';
+                } else {
+                    adminPanel.style.display = 'none';
+                    showAdminBtn.innerText = '🔧 Admin Panel (Click to Open)';
+                }
+            });
+
+            hideAdminBtn.addEventListener('click', () => {
+                adminPanel.style.display = 'none';
+                showAdminBtn.innerText = '🔧 Admin Panel (Click to Open)';
+            });
+
+            // ---------- ADMIN FUNCTIONS ----------
+            function updateAdminBalance() {
+                adminUserBalance.innerText = balance.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
+            }
+
+            addBalanceBtn.addEventListener('click', () => {
+                let amount = parseFloat(addBalanceAmount.value);
+                if (isNaN(amount) || amount <= 0) {
+                    alert('Please enter a valid amount');
+                    return;
+                }
+                balance += amount;
+                updateBalanceUI();
+                updateAdminBalance();
+                alert(`Added ${amount} BDT to user balance. New balance: ${balance}`);
+            });
+
+            resetGameBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to reset the game? All progress will be lost.')) {
+                    balance = 1433136;
+                    totalWinAmount = 0;
+                    betAmount = 10;
+                    gameActive = false;
+                    currentMultiplier = 1.0;
+                    if (autoModeActive) stopAutoMode();
+                    updateBalanceUI();
+                    updateAdminBalance();
+                    totalWinSpan.innerText = '0';
+                    totalBetSpan.innerText = '10';
+                    multiplierSpan.innerText = '1.00x';
+                    alert('Game has been reset.');
+                }
+            });
+
+            // ---------- LOGIN ----------
+            function promptLogin() {
+                const enteredId = prompt("আপনার আইডি দিন (01979243004):");
+                if (enteredId === CORRECT_ID) {
+                    isLoggedIn = true;
+                    loginButton.classList.add('logged-in');
+                    loginButton.innerText = '✅ LOGGED IN';
+                    alert("লগইন সফল! এখন খেলা যাবে।");
+                } else {
+                    isLoggedIn = false;
+                    loginButton.classList.remove('logged-in');
+                    loginButton.innerText = '🔑 LOGIN';
+                    if (enteredId !== null) {
+                        alert("ভুল আইডি! প্রবেশ করতে পারবেন না।");
+                    }
+                }
+            }
+            loginButton.addEventListener('click', promptLogin);
+
+            function requireLogin() {
+                if (!isLoggedIn) {
+                    alert("প্রথমে সঠিক আইডি দিয়ে লগইন করুন (🔑 বাটন)");
+                    return false;
+                }
+                return true;
+            }
+
+            // ---------- DEPOSIT MODAL ----------
+            function closeModal() {
+                depositModal.style.display = 'none';
+                trxidInput.value = '';
+            }
+            function depositFunds() {
+                balance += 100;
+                updateBalanceUI();
+                updateAdminBalance();
+                closeModal();
+            }
+            confirmTrxBtn.addEventListener('click', () => {
+                const trxid = trxidInput.value.trim();
+                if (trxid === '') {
+                    alert('Please enter a transaction ID.');
+                    return;
+                }
+                depositFunds();
+                alert('Deposit successful! 100 BDT added.');
+            });
+            quickAddBtn.addEventListener('click', () => {
+                depositFunds();
+                alert('Quick deposit: 100 BDT added (testing).');
+            });
+
+            // ---------- UI UPDATES ----------
+            function updateBalanceUI() {
+                bigBalanceSpan.innerText = balance.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
+                updateAdminBalance();
+            }
+            function updateBetStats() {
+                totalBetSpan.innerText = betAmount.toFixed(0);
+            }
+            function updateTotalWin(amount) {
+                totalWinAmount += amount;
+                totalWinSpan.innerText = totalWinAmount.toFixed(0);
+            }
+
+            // ---------- CANVAS ----------
+            function drawCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                grad.addColorStop(0, '#1b2b4a');
+                grad.addColorStop(1, '#0f1a2f');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#fff9e6';
+                for (let i = 0; i < 8; i++) {
+                    ctx.beginPath();
+                    ctx.arc(30 + i * 35, 20 + (i % 3) * 10, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#5d8c6b';
+                ctx.lineWidth = 3;
+                ctx.moveTo(0, canvas.height - 20);
+                ctx.lineTo(canvas.width, canvas.height - 20);
+                ctx.stroke();
+
+                let planeY = 70 + Math.sin(planeX / 20) * 8;
+                ctx.fillStyle = '#f0b90b';
+                ctx.beginPath();
+                ctx.moveTo(planeX, planeY);
+                ctx.lineTo(planeX - 18, planeY - 8);
+                ctx.lineTo(planeX - 12, planeY - 2);
+                ctx.lineTo(planeX - 24, planeY + 6);
+                ctx.lineTo(planeX - 6, planeY + 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#ffd966';
+                ctx.beginPath();
+                ctx.arc(planeX - 6, planeY - 2, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // ---------- GAME LOOP ----------
+            function gameLoop() {
+                if (gameActive) {
+                    let increment = 0.005 + Math.random() * 0.01;
+                    currentMultiplier += increment;
+                    currentMultiplier = Math.round(currentMultiplier * 100) / 100;
+                    multiplierSpan.innerText = currentMultiplier.toFixed(2) + 'x';
+
+                    planeX = 50 + (currentMultiplier - 1.0) * 30;
+                    if (planeX > canvas.width - 20) planeX = canvas.width - 20;
+
+                    if (currentMultiplier >= crashMultiplier) {
+                        gameActive = false;
+                        multiplierSpan.innerText = '💥 CRASH 💥';
+                        currentMultiplier = 0;
+                    }
+                } else {
+                    planeX = (planeX + 0.5) % (canvas.width + 40);
+                }
+                drawCanvas();
+                animationFrame = requestAnimationFrame(gameLoop);
+            }
+            animationFrame = requestAnimationFrame(gameLoop);
+
+            // ---------- SPIN ----------
+            function placeBet() {
+                if (!requireLogin()) return;
+                if (gameActive) return;
+                if (balance < betAmount) {
+                    alert('Balance low! Please deposit.');
+                    depositModal.style.display = 'flex';
+                    return;
+                }
+                if (autoModeActive) stopAutoMode();
+
+                balance -= betAmount;
+                updateBalanceUI();
+
+                crashMultiplier = 1.2 + Math.random() * 18.8;
+                crashMultiplier = Math.round(crashMultiplier * 100) / 100;
+                currentMultiplier = 1.0;
+                gameActive = true;
+                multiplierSpan.innerText = '1.00x';
+                planeX = 40;
+            }
+
+            function cashOut() {
+                if (!gameActive || autoModeActive) return;
+                let win = betAmount * currentMultiplier;
+                balance += win;
+                updateTotalWin(win);
+                gameActive = false;
+                currentMultiplier = 0;
+                updateBalanceUI();
+                multiplierSpan.innerText = 'CASHED ' + win.toFixed(0);
+            }
+
+            // ---------- AUTO MODE ----------
+            function startAutoMode() {
+                if (!requireLogin()) return;
+                if (autoInterval) return;
+                if (gameActive) {
+                    alert('Wait for current game to finish.');
+                    return;
+                }
+                autoModeActive = true;
+                autoInterval = setInterval(() => {
+                    if (!autoModeActive) {
+                        stopAutoMode();
+                        return;
+                    }
+
+                    if (gameActive) {
+                        if (currentMultiplier >= 2.0) {
+                            let win = betAmount * currentMultiplier;
+                            balance += win;
+                            updateTotalWin(win);
+                            gameActive = false;
+                            currentMultiplier = 0;
+                            updateBalanceUI();
+                            multiplierSpan.innerText = 'AUTO CASH';
+                        }
+                    } else {
+                        if (balance < betAmount) {
+                            alert('Auto stop: insufficient balance');
+                            stopAutoMode();
+                            return;
+                        }
+                        balance -= betAmount;
+                        updateBalanceUI();
+
+                        crashMultiplier = 1.2 + Math.random() * 18.8;
+                        crashMultiplier = Math.round(crashMultiplier * 100) / 100;
+                        currentMultiplier = 1.0;
+                        gameActive = true;
+                        multiplierSpan.innerText = '1.00x';
+                        planeX = 40;
+                    }
+                }, 100);
+            }
+
+            function stopAutoMode() {
+                if (autoInterval) {
+                    clearInterval(autoInterval);
+                    autoInterval = null;
+                }
+                autoModeActive = false;
+                holdButton.innerText = 'HOLD';
+            }
+
+            // ---------- EVENT LISTENERS ----------
+            spinButton.addEventListener('click', () => {
+                if (gameActive) {
+                    cashOut();
+                } else {
+                    placeBet();
+                }
+            });
+
+            holdButton.addEventListener('click', () => {
+                if (autoModeActive) {
+                    stopAutoMode();
+                    holdButton.innerText = 'HOLD';
+                } else {
+                    startAutoMode();
+                    holdButton.innerText = 'HOLDING';
+                }
+            });
+
+            document.getElementById('maxBet').addEventListener('click', () => {
+                betAmount = 100;
+                updateBetStats();
+            });
+
+            document.querySelectorAll('.game-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.innerText === '5XSALE') betAmount = 5;
+                    else if (btn.innerText === 'LEVEL23') betAmount = 23;
+                    else if (btn.innerText === 'COLLECT') betAmount = 50;
+                    else if (btn.innerText === 'FRAND') betAmount = 15;
+                    else if (btn.innerText === 'DARKOES') betAmount = 30;
+                    else if (btn.innerText === 'MINIGOE') betAmount = 8;
+                    else if (btn.innerText === 'MINI') betAmount = 3;
+                    updateBetStats();
+                });
+            });
+
+            function resizeCanvas() {
+                let containerWidth = document.querySelector('.flyzone').clientWidth;
+                canvas.width = Math.min(containerWidth - 10, 600);
+                canvas.height = 140;
+                drawCanvas();
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            // Initialize
+            updateBalanceUI();
+            updateBetStats();
+            totalWinSpan.innerText = '0';
+        })();
+    </script>
+</body>
+</html>
